@@ -134,11 +134,11 @@ class DAQ_Move_RedpitayaSCPI(DAQ_Move_base):
                 self.settings.child('bounds', 'max_bound').setValue(50e6)
             elif param.value == 'amplitude':
                 self.settings.child('bounds', 'min_bound').setValue(0)
-                self.settings.child('bounds', 'max_bound').setValue(self.settings['generation'])
+                self.settings.child('bounds', 'max_bound').setValue(self.settings['gen'])
             self.settings.child('bounds', 'is_bounds').value()
             self.settings.child('bounds', 'is_bounds').setValue(True)
 
-        elif param.name() == 'generation':
+        elif param.name() == 'gen':
             if self.axis_name == 'amplitude':
                 self.settings.child('bounds', 'min_bound').setValue(0)
                 self.settings.child('bounds', 'max_bound').setValue(param.value())
@@ -199,12 +199,12 @@ class DAQ_Move_RedpitayaSCPI(DAQ_Move_base):
 
         self.aout.shape = self.settings['shape'] #plugin_config('generator', 'shape')
 
-        if self.settings['axis'] =='frequency':
+        if self.axis_name =='frequency':
             self.settings.child('bounds', 'min_bound').setValue(1e-6)
             self.settings.child('bounds', 'max_bound').setValue(50e6)
-        elif self.settings['axis'] == 'amplitude':
+        elif self.axis_name == 'amplitude':
             self.settings.child('bounds', 'min_bound').setValue(0)
-            self.settings.child('bounds', 'max_bound').setValue(self.settings['generation'])
+            self.settings.child('bounds', 'max_bound').setValue(self.settings['gen'])
         self.settings.child('bounds', 'is_bounds').value()
         self.settings.child('bounds', 'is_bounds').setValue(True)
         self.settings.child('bounds', 'is_bounds').setOpts(readonly=True)
