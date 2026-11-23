@@ -132,7 +132,7 @@ class DAQ_Move_RedpitayaSCPI(DAQ_Move_base):
             if param.value() =='frequency':
                 self.settings.child('bounds', 'min_bound').setValue(1e-6)
                 self.settings.child('bounds', 'max_bound').setValue(50e6)
-            elif param.value == 'amplitude':
+            elif param.value() == 'amplitude':
                 self.settings.child('bounds', 'min_bound').setValue(0)
                 self.settings.child('bounds', 'max_bound').setValue(self.settings['gen'])
             self.settings.child('bounds', 'is_bounds').value()

@@ -12,9 +12,12 @@ package-url = 'https://github.com/PyMoDAQ/pymodaq_plugins_redpitaya'
 name = "pymodaq_plugins_redpitaya"
 description = 'PyMoDAQ Plugin to use the Redpitaya electronic board'
 dependencies = [
-    "pymodaq>=5.0.0",
+    "pymodaq>=5.3.2",
+    "pymodaq_utils>=5.3.1",
+    "pymodaq_gui>=5.3.0",
+    "pymodaq_data>=5.3.0",
     'pymeasure',
-    'pyvisa-py'
+    'pyvisa-py',
     #todo: list here all dependencies your package may have
 ]
 
