@@ -36,6 +36,12 @@ Instruments
 Below is the list of instruments included in this plugin
 
 
+Actuators
++++++++++
+
+* **RedpitayaSCPI**: control the fast analog outputs (amplitude and frequency), Gen 1 and Gen 2 boards
+* **RedpitayaAnalogSlow**: control the slow analog outputs (0 to 1.8 V)
+
 Viewer1D
 ++++++++
 
@@ -48,4 +54,6 @@ Installation instructions
 
 * PyMoDAQ’s version: >= 4.1.0
 * Operating system’s version: any
-* For the SCPI version, use the driver from the pymeasure package
+* For the SCPI version, use the driver from the pymeasure package. The Gen 2 features (slow output read back,
+  2 V amplitude range) need a pymeasure version newer than 0.16.0, until released:
+  ``pip install git+https://github.com/pymeasure/pymeasure``

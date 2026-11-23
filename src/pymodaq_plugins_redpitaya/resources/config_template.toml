@@ -1,4 +1,4 @@
-title = 'this is the configuration file of the redpitaya plugin !!!!!!'
+title = 'this is the configuration file of the redpitaya plugin'
 
 ip_address = '169.254.121.34'
 port = 5000
@@ -25,6 +25,9 @@ offset = 0 # in V
 phase = 0 # in degrees
 cycle = 0.5 # in fraction (1 = 100%)
 channel = 1
+
+[generator_slow]
+channel = 0  # slow analog output pin (0 to 3), outputs 0 to 1.8 V
 
 [sweep]
 sweep_modes ='LINEAR'

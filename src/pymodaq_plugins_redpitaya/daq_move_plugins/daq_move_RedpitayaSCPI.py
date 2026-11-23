@@ -139,6 +139,7 @@ class DAQ_Move_RedpitayaSCPI(DAQ_Move_base):
             self.settings.child('bounds', 'is_bounds').setValue(True)
 
         elif param.name() == 'gen':
+            self._apply_board_generation(param.value())
             if self.axis_name == 'amplitude':
                 self.settings.child('bounds', 'min_bound').setValue(0)
                 self.settings.child('bounds', 'max_bound').setValue(param.value())
@@ -167,6 +168,12 @@ class DAQ_Move_RedpitayaSCPI(DAQ_Move_base):
         elif param.name() == 'gen_trigger':
             self.aout.gen_trigger_source = param.value()
             # TODO implement trigger source setting correctly
+
+    def _apply_board_generation(self, generation: int):
+        """ Adapt the allowed amplitude range to the board: 1 V max for the original
+        Red Pitaya, 2 V for the STEMlab 125-14 Pro (Gen 2). The ``amplitude_values`` property
+        needs a pymeasure version with dynamic amplitude ranges."""
+        self.aout.amplitude_values = [0, generation]
 
     def is_enabled(self) -> bool:
         "It defines if the supply voltage is enabled on the output channel chosen"
@@ -197,6 +204,7 @@ class DAQ_Move_RedpitayaSCPI(DAQ_Move_base):
         else:
             self.controller = controller
 
+        self._apply_board_generation(self.settings['gen'])
         self.aout.shape = self.settings['shape'] #plugin_config('generator', 'shape')
 
         if self.axis_name =='frequency':

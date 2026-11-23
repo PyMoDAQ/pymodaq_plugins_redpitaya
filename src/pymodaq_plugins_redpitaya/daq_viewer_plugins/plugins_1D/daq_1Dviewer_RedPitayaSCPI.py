@@ -10,6 +10,9 @@ from pymodaq_plugins_redpitaya.utils import Config
 
 from pymeasure.instruments.redpitaya.redpitaya_scpi import RedPitayaScpi, AnalogInputFastChannel
 
+GAINS = ('LV', 'HV')  # input gain, see the jumpers on the board
+
+
 class DAQ_1DViewer_RedPitayaSCPI(DAQ_Viewer_base):
     """ Instrument plugin class for a 1D viewer.
     
@@ -47,9 +50,9 @@ class DAQ_1DViewer_RedPitayaSCPI(DAQ_Viewer_base):
             {'title': 'Window Length:', 'name': 'window_length', 'type': 'float',
              'value': 0, 'siPrefix': True, 'suffix': 's', 'readonly': True},
             {'title': 'Gain1 (jumper CH1):', 'name': 'gain1', 'type': 'list',
-             'limits': RedPitayaScpi.GAINS, 'value': plugin_config('sampling', 'gain1')},
+             'limits': GAINS, 'value': plugin_config('sampling', 'gain1')},
             {'title': 'Gain2 (jumper CH2):', 'name': 'gain2', 'type': 'list',
-             'limits': RedPitayaScpi.GAINS, 'value': plugin_config('sampling', 'gain2')},
+             'limits': GAINS, 'value': plugin_config('sampling', 'gain2')},
 
         ]},
         {'title': 'Triggering:', 'name': 'triggering', 'type': 'group', 'children': [
@@ -99,9 +102,9 @@ class DAQ_1DViewer_RedPitayaSCPI(DAQ_Viewer_base):
             self.controller.acq_trigger_source = param.value()
 
         elif param.name() == 'gain1':
-            self.controller.acq_gain1 = param.value()
+            self.controller.analog_in[1].gain = param.value()
         elif param.name() == 'gain2':
-            self.controller.acq_gain2 = param.value()
+            self.controller.analog_in[2].gain = param.value()
 
     def _center_trigger(self):
         if self.settings['triggering', 'center_trigger']:
@@ -142,8 +145,8 @@ class DAQ_1DViewer_RedPitayaSCPI(DAQ_Viewer_base):
         self.controller.acq_format = 'ASCII'
         self.controller.acq_units = 'VOLTS'
 
-        self.controller.acq_gain1 = self.settings['sampling', 'gain1']
-        self.controller.acq_gain2 = self.settings['sampling', 'gain2']
+        self.controller.analog_in[1].gain = self.settings['sampling', 'gain1']
+        self.controller.analog_in[2].gain = self.settings['sampling', 'gain2']
 
         self.controller.acq_trigger_level = self.settings['triggering', 'level']
 

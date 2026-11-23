@@ -7,7 +7,7 @@ from pymodaq_utils.utils import ThreadCommand  # object used to send info back t
 
 from pymodaq_gui.parameter import Parameter
 
-from pymeasure.instruments.redpitaya.redpitaya_scpi import RedPitayaScpi, AnalogOutputFastChannel
+from pymeasure.instruments.redpitaya.redpitaya_scpi import RedPitayaScpi
 
 from pymodaq_data import Q_
 
@@ -50,9 +50,7 @@ class DAQ_Move_RedpitayaAnalogSlow(DAQ_Move_base):
     is_multiaxes = True
     _axis_names: Union[List[str], Dict[str, int]] = ['voltage']
     _controller_units: Union[str, List[str]] = ['V']
-    _epsilon: Union[float, List[float]] = [0.128] # Detailing 5mV and 1Hz. Resolution of reading is 5mV
-    # _epsilon: Union[float, List[float]] = 0.1  # Detailing 1mV and 1Hz #TODO replace this by a value that is correct depending on your controller
-    # TODO it could be a single float of a list of float (as much as the number of axes)
+    _epsilons: Union[float, List[float]] = [0.005]  # Resolution of reading is 5mV
     data_actuator_type = DataActuatorType.DataActuator
 
     params = [   {'title': 'IP Address:', 'name': 'ip_address', 'type': 'str',
@@ -63,9 +61,7 @@ class DAQ_Move_RedpitayaAnalogSlow(DAQ_Move_base):
                  {'title': 'Channel', 'name': 'channel', 'type': 'list', 'limits':{'0': 0, '1': 1, '2': 2, '3': 3},
                   'value': plugin_config('generator_slow', 'channel')},
 
-                ] + comon_parameters_fun(is_multiaxes, axis_names=_axis_names, epsilon=_epsilon)
-    # _epsilon is the initial default value for the epsilon parameter allowing pymodaq to know if the controller reached
-    # the target value. It is the developer responsibility to put here a meaningful value
+                ] + comon_parameters_fun(is_multiaxes, axis_names=_axis_names, epsilon=_epsilons)
 
     def ini_attributes(self):
         self.controller: RedPitayaScpi = None
@@ -82,15 +78,22 @@ class DAQ_Move_RedpitayaAnalogSlow(DAQ_Move_base):
         float: The position obtained after scaling conversion.
         """
 
-        pos = DataActuator(data=getattr(self.aout_slow, self.axis_name),
-                           units=self.axis_unit)
+        try:
+            value = getattr(self.aout_slow, self.axis_name)
+        except LookupError:
+            # the slow output is write only in the pymeasure versions without read back:
+            # report the last commanded value
+            value = self.target_value.value(self.axis_unit) \
+                if isinstance(self.target_value, DataActuator) else self.target_value
+        pos = DataActuator(data=value, units=self.axis_unit)
         pos = self.get_position_with_scaling(pos)
         return pos
 
 
     def close(self):
         """Terminate the communication protocol"""
-        self.aout_slow.reset()
+        if self.is_master and self.controller is not None:
+            self.aout_slow.reset()
 
 
     def commit_settings(self, param: Parameter):
@@ -102,7 +105,7 @@ class DAQ_Move_RedpitayaAnalogSlow(DAQ_Move_base):
             A given parameter (within detector_settings) whose value has been changed by the user
         """
         if param.name() == 'axis':
-            if param.value == 'voltage':
+            if param.value() == 'voltage':
                 # self.settings.child('bounds', 'is_bounds').value()
                 self.settings.child('bounds', 'min_bound').setValue(0)
                 self.settings.child('bounds', 'max_bound').setValue(1.8)
@@ -158,11 +161,8 @@ class DAQ_Move_RedpitayaAnalogSlow(DAQ_Move_base):
         """
         value = self.check_bound(value)  #if user checked bounds, the defined bounds are applied here
         self.target_value = value
-        print(value)
-        value = self.set_position_with_scaling(value)  # TODO apply scaling if the user specified one
-        print(self.axis_unit)
+        value = self.set_position_with_scaling(value)  # apply scaling if the user specified one
         setattr(self.aout_slow, self.axis_name, value.value(self.axis_unit))
-        #  TODO change this run command to work with other trigger sources than INTernal trigger
 
     def move_rel(self, value: DataActuator):
         """ Move the actuator to the relative target actuator value defined by value
@@ -171,8 +171,8 @@ class DAQ_Move_RedpitayaAnalogSlow(DAQ_Move_base):
         ----------
         value: (float) value of the relative target positioning
         """
-        value = self.check_bound(self.current_position + value) - self.current_position
-        self.target_value = value + self.current_position
+        value = self.check_bound(self.current_value + value) - self.current_value
+        self.target_value = value + self.current_value
         self.move_abs(self.target_value)
 
     def move_home(self):
