@@ -5,8 +5,12 @@ pytest.importorskip('pymodaq.utils.plugin_testing')
 
 from pymodaq.utils.plugin_testing import make_actuator, move_abs_and_wait
 
-from pymodaq_plugins_redpitaya.daq_move_plugins import (daq_move_RedpitayaAnalogSlow as slow_module,
-                                                        daq_move_RedpitayaSCPI as scpi_module)
+try:
+    from pymodaq_plugins_redpitaya.daq_move_plugins import (daq_move_RedpitayaAnalogSlow as slow_module,
+                                                            daq_move_RedpitayaSCPI as scpi_module)
+except ImportError:  # the pymeasure release does not yet contain the Red Pitaya driver (needs master)
+    pytest.skip('These tests need a pymeasure version with the Red Pitaya driver (not yet released)',
+                allow_module_level=True)
 
 
 class FakeSlowChannel:
